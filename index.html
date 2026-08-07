@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recommend a Speaker · Tom Lab</title>
+  <meta name="description" content="Suggest a potential speaker for our lab meetings." />
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --surface: #ffffff;
+      --text: #1c1b19;
+      --muted: #6b6560;
+      --border: #e7e2db;
+      --accent: #3f5a73;
+      --accent-hover: #324a60;
+      --accent-soft: #eef2f6;
+      --danger: #b4453a;
+      --radius: 12px;
+      --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1917;
+        --surface: #232120;
+        --text: #ece8e3;
+        --muted: #a39c93;
+        --border: #363330;
+        --accent: #7d9cba;
+        --accent-hover: #93aecb;
+        --accent-soft: #2a2f36;
+        --danger: #e08a80;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+    header.site { margin-bottom: 2.25rem; }
+    .kicker {
+      font-family: var(--font-sans);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 0 0 0.6rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-weight: 600;
+      font-size: 2.1rem;
+      line-height: 1.15;
+      margin: 0 0 0.65rem;
+      letter-spacing: -0.01em;
+    }
+    .lede { color: var(--muted); margin: 0; font-size: 1.02rem; max-width: 52ch; }
+    .nav { margin-top: 1.25rem; font-size: 0.9rem; }
+    .nav a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+    .nav a:hover { border-bottom-color: var(--accent); }
+
+    form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .field { margin-bottom: 1.4rem; }
+    .field:last-of-type { margin-bottom: 0; }
+    label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 0.4rem; }
+    .req { color: var(--danger); font-weight: 600; }
+    .hint { display: block; font-weight: 400; color: var(--muted); font-size: 0.83rem; margin-top: 0.15rem; }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.7rem 0.8rem;
+      font: inherit;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    textarea { resize: vertical; min-height: 92px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; gap: 0; } }
+
+    button {
+      appearance: none;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      padding: 0.8rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* honeypot */
+    .hp { position: absolute; left: -9999px; opacity: 0; height: 0; overflow: hidden; }
+
+    #result { margin-top: 1.25rem; text-align: center; font-size: 0.95rem; }
+    #result.ok { color: var(--accent); }
+    #result.err { color: var(--danger); }
+    .success-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 1.75rem;
+      text-align: center;
+    }
+    .success-card h2 { font-family: var(--font-serif); margin: 0 0 0.5rem; }
+    .success-card p { color: var(--muted); margin: 0 0 1.5rem; }
+    .success-card a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    footer.site { margin-top: 2.5rem; text-align: center; color: var(--muted); font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <p class="kicker">Tom Lab · Friday Sync Speakers</p>
+      <h1>Recommend a lab-meeting speaker</h1>
+      <p class="lede">
+        Know someone whose work you'd love the lab to hear about? Drop their details below
+        and we'll consider reaching out. Takes about a minute.
+      </p>
+      <p class="nav"><a href="dashboard.html">→ Browse current speaker suggestions</a></p>
+    </header>
+
+    <form id="speaker-form">
+      <!-- Web3Forms: replace with your own free access key from https://web3forms.com -->
+      <input type="hidden" name="access_key" value="2f5f5f83-199d-43ab-8d66-ec23248f69bd" />
+      <input type="hidden" name="subject" value="New lab speaker recommendation" />
+      <input type="hidden" name="from_name" value="Tom Lab Speaker Form" />
+      <!-- Honeypot spam trap: real users leave this empty -->
+      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" />
+
+      <div class="field">
+        <label for="speaker_name">Speaker's name <span class="req">*</span></label>
+        <input id="speaker_name" name="Speaker name" type="text" required placeholder="Dr. Ada Lovelace" />
+      </div>
+
+      <div class="field">
+        <label for="profile">Profile link <span class="req">*</span>
+          <span class="hint">Personal site, Google Scholar, or lab page — whatever's most useful.</span>
+        </label>
+        <input id="profile" name="Profile link" type="url" required placeholder="https://scholar.google.com/..." />
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="affiliation">Affiliation
+            <span class="hint">Institution or company.</span>
+          </label>
+          <input id="affiliation" name="Affiliation" type="text" placeholder="MIT" />
+        </div>
+        <div class="field">
+          <label for="career_stage">Career stage
+            <span class="hint">Optional.</span>
+          </label>
+          <select id="career_stage" name="Career stage">
+            <option value="">—</option>
+            <option>PhD student</option>
+            <option>Postdoc</option>
+            <option>Faculty / PI</option>
+            <option>Industry researcher</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="keywords">Research areas / keywords <span class="req">*</span>
+          <span class="hint">Comma-separated — e.g. reinforcement learning, robotics, causal inference.</span>
+        </label>
+        <input id="keywords" name="Research areas" type="text" required placeholder="vision, self-supervised learning, neuroscience" />
+      </div>
+
+      <div class="field">
+        <label for="fit">Why they'd be a great fit
+          <span class="hint">A sentence or two on the work and why the lab would care.</span>
+        </label>
+        <textarea id="fit" name="Why a good fit" placeholder="Their recent paper on ... is directly relevant to our project on ..."></textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="contact">Best way to contact
+            <span class="hint">Email, or "intro via me", etc.</span>
+          </label>
+          <input id="contact" name="Best way to contact" type="text" placeholder="ada@mit.edu" />
+        </div>
+        <div class="field">
+          <label for="relationship">How you know them
+            <span class="hint">Optional.</span>
+          </label>
+          <input id="relationship" name="How you know them" type="text" placeholder="Met at NeurIPS; former labmate" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="availability">When they might be available
+          <span class="hint">Optional — any timing notes, e.g. "free this fall", "on sabbatical until spring".</span>
+        </label>
+        <input id="availability" name="Availability" type="text" placeholder="Flexible; prefers later in the semester" />
+      </div>
+
+      <div class="field">
+        <label for="recommender">Your name (recommender) <span class="req">*</span></label>
+        <input id="recommender" name="Recommended by" type="text" required placeholder="Your name" />
+      </div>
+
+      <button type="submit" id="submit-btn">Submit recommendation</button>
+      <div id="result"></div>
+    </form>
+
+    <footer class="site">
+      Recommendations are reviewed before appearing on the dashboard.
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('speaker-form');
+    const btn = document.getElementById('submit-btn');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      result.textContent = '';
+      result.className = '';
+
+      const key = form.querySelector('[name="access_key"]').value;
+      if (key === 'YOUR_ACCESS_KEY_HERE') {
+        result.textContent = 'Set up needed: add your free Web3Forms access key in index.html.';
+        result.className = 'err';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: data,
+        });
+        const json = await res.json();
+        if (json.success) {
+          form.outerHTML = `
+            <div class="success-card">
+              <h2>Thank you!</h2>
+              <p>Your recommendation was sent to the organizers. We'll take a look soon.</p>
+              <a href="index.html">Recommend another →</a>
+            </div>`;
+        } else {
+          throw new Error(json.message || 'Submission failed');
+        }
+      } catch (err) {
+        result.textContent = 'Something went wrong: ' + err.message + '. Please try again.';
+        result.className = 'err';
+        btn.disabled = false;
+        btn.textContent = 'Submit recommendation';
+      }
+    });
+  </script>
+</body>
+</html>

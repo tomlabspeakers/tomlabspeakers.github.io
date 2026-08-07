@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speaker Suggestions · Tom Lab</title>
+  <meta name="description" content="Directory of recommended speakers for lab meetings." />
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --surface: #ffffff;
+      --text: #1c1b19;
+      --muted: #6b6560;
+      --border: #e7e2db;
+      --accent: #3f5a73;
+      --accent-hover: #324a60;
+      --accent-soft: #eef2f6;
+      --done: #4a7c59;
+      --done-soft: #eaf2ec;
+      --radius: 12px;
+      --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1917;
+        --surface: #232120;
+        --text: #ece8e3;
+        --muted: #a39c93;
+        --border: #363330;
+        --accent: #7d9cba;
+        --accent-hover: #93aecb;
+        --accent-soft: #2a2f36;
+        --done: #7fb08c;
+        --done-soft: #253028;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+    .kicker {
+      text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.72rem;
+      font-weight: 600; color: var(--accent); margin: 0 0 0.6rem;
+    }
+    h1 {
+      font-family: var(--font-serif); font-weight: 600; font-size: 2.1rem;
+      line-height: 1.15; margin: 0 0 0.65rem; letter-spacing: -0.01em;
+    }
+    .lede { color: var(--muted); margin: 0; max-width: 60ch; }
+    .nav { margin-top: 1.25rem; font-size: 0.9rem; }
+    .nav a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+    .nav a:hover { border-bottom-color: var(--accent); }
+
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+      margin: 2rem 0 1rem;
+    }
+    #search {
+      flex: 1; min-width: 220px; padding: 0.65rem 0.85rem; font: inherit;
+      color: var(--text); background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    #search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .count { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+
+    #tag-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.75rem; }
+    .tag {
+      font-size: 0.78rem; padding: 0.25rem 0.65rem; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      cursor: pointer; transition: all 0.12s; font-family: inherit;
+    }
+    .tag:hover { border-color: var(--accent); color: var(--accent); }
+    .tag.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.1rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.35rem; display: flex; flex-direction: column;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .card.done { opacity: 0.58; background: var(--bg); box-shadow: none; transition: opacity 0.18s; }
+    .card.done:hover { opacity: 1; }
+    .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+    .card h2 { font-family: var(--font-serif); font-size: 1.2rem; margin: 0 0 0.15rem; }
+    .card h2 a { color: var(--text); text-decoration: none; }
+    .card h2 a:hover { color: var(--accent); }
+    .affil { color: var(--muted); font-size: 0.86rem; margin: 0 0 0.75rem; }
+    .status {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+      padding: 0.2rem 0.5rem; border-radius: 6px; white-space: nowrap;
+      background: var(--accent-soft); color: var(--accent);
+    }
+    .status.done { background: var(--done-soft); color: var(--done); }
+    .fit { font-size: 0.92rem; margin: 0 0 0.9rem; color: var(--text); }
+    .kw { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 0.9rem; }
+    .kw span {
+      font-size: 0.74rem; padding: 0.18rem 0.5rem; border-radius: 6px;
+      background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+    }
+    .meta { margin-top: auto; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    .empty, .loading { text-align: center; color: var(--muted); padding: 3rem 1rem; }
+    .empty a { color: var(--accent); text-decoration: none; }
+    footer.site { margin-top: 3rem; text-align: center; color: var(--muted); font-size: 0.82rem; }
+    footer.site a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="kicker">Tom Lab · Friday Sync Speakers</p>
+      <h1>Speaker suggestions</h1>
+      <p class="lede">Speakers recommended by the lab for upcoming meetings. Search by name or filter by research area.</p>
+      <p class="nav"><a href="index.html">＋ Recommend someone</a></p>
+    </header>
+
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search by name, affiliation, or keyword…" />
+      <span class="count" id="count"></span>
+    </div>
+    <div id="tag-filters"></div>
+
+    <div id="grid" class="grid"></div>
+    <div id="status-msg" class="loading">Loading speakers…</div>
+
+    <footer class="site">
+      Data lives in <code>speakers.json</code>. <a href="index.html">Recommend a speaker →</a>
+    </footer>
+  </div>
+
+  <script>
+    let speakers = [];
+    let activeTag = null;
+    const grid = document.getElementById('grid');
+    const statusMsg = document.getElementById('status-msg');
+    const search = document.getElementById('search');
+    const countEl = document.getElementById('count');
+    const tagFilters = document.getElementById('tag-filters');
+
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+
+    fetch('speakers.json?_=' + Date.now())
+      .then(r => { if (!r.ok) throw new Error('Could not load speakers.json'); return r.json(); })
+      .then(data => {
+        speakers = Array.isArray(data) ? data : [];
+        buildTags();
+        render();
+        statusMsg.style.display = 'none';
+      })
+      .catch(err => {
+        statusMsg.textContent = err.message + '. Make sure speakers.json is present.';
+      });
+
+    function buildTags() {
+      const counts = {};
+      speakers.forEach(s => (s.keywords || []).forEach(k => {
+        const key = k.trim();
+        if (key) counts[key] = (counts[key] || 0) + 1;
+      }));
+      const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+      tagFilters.innerHTML = sorted.map(t =>
+        `<button class="tag" data-tag="${esc(t)}">${esc(t)} · ${counts[t]}</button>`
+      ).join('');
+      tagFilters.querySelectorAll('.tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const t = btn.dataset.tag;
+          activeTag = activeTag === t ? null : t;
+          tagFilters.querySelectorAll('.tag').forEach(b =>
+            b.classList.toggle('active', b.dataset.tag === activeTag));
+          render();
+        });
+      });
+    }
+
+    function render() {
+      const q = search.value.trim().toLowerCase();
+      const filtered = speakers.filter(s => {
+        const hay = [s.name, s.affiliation, s.fit, s.recommended_by, s.availability, (s.keywords || []).join(' ')]
+          .join(' ').toLowerCase();
+        const matchQ = !q || hay.includes(q);
+        const matchTag = !activeTag || (s.keywords || []).some(k => k.trim() === activeTag);
+        return matchQ && matchTag;
+      });
+
+      countEl.textContent = filtered.length + ' of ' + speakers.length;
+
+      if (!filtered.length) {
+        grid.innerHTML = speakers.length
+          ? '<div class="empty">No speakers match your filters yet.</div>'
+          : '<div class="empty">No speakers yet — <a href="index.html">recommend the first one →</a></div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(s => {
+        const isDone = /\b(done|spoke|completed|presented|past)\b/i.test(s.status || '');
+        return `
+        <article class="card${isDone ? ' done' : ''}">
+          <div class="card-head">
+            <div>
+              <h2>${s.profile
+                ? `<a href="${esc(s.profile)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>`
+                : esc(s.name)}</h2>
+              <p class="affil">${esc([s.affiliation, s.career_stage].filter(Boolean).join(' · '))}</p>
+            </div>
+            ${s.status ? `<span class="status${isDone ? ' done' : ''}">${isDone ? '✓ ' : ''}${esc(s.status)}</span>` : ''}
+          </div>
+          ${s.fit ? `<p class="fit">${esc(s.fit)}</p>` : ''}
+          ${(s.keywords || []).length
+            ? `<div class="kw">${s.keywords.map(k => `<span>${esc(k)}</span>`).join('')}</div>` : ''}
+          ${(s.availability || s.recommended_by) ? `<div class="meta">${
+            [s.availability ? `Available: ${esc(s.availability)}` : '',
+             s.recommended_by ? `Recommended by ${esc(s.recommended_by)}` : '']
+            .filter(Boolean).join(' · ')
+          }</div>` : ''}
+        </article>`;
+      }).join('');
+    }
+
+    search.addEventListener('input', render);
+  </script>
+</body>
+</html>
