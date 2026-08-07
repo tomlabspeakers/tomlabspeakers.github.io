@@ -147,23 +147,19 @@
     </header>
 
     <form id="speaker-form">
-      <!-- Web3Forms: replace with your own free access key from https://web3forms.com -->
-      <input type="hidden" name="access_key" value="2f5f5f83-199d-43ab-8d66-ec23248f69bd" />
-      <input type="hidden" name="subject" value="New lab speaker recommendation" />
-      <input type="hidden" name="from_name" value="Tom Lab Speaker Form" />
       <!-- Honeypot spam trap: real users leave this empty -->
       <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" />
 
       <div class="field">
         <label for="speaker_name">Speaker's name <span class="req">*</span></label>
-        <input id="speaker_name" name="Speaker name" type="text" required placeholder="Dr. Claude Shannon" />
+        <input id="speaker_name" name="speaker_name" type="text" required placeholder="Dr. Claude Shannon" />
       </div>
 
       <div class="field">
         <label for="profile">Profile link <span class="req">*</span>
           <span class="hint">Personal site, Google Scholar, or lab page — whatever's most useful.</span>
         </label>
-        <input id="profile" name="Profile link" type="url" required placeholder="https://scholar.google.com/..." />
+        <input id="profile" name="profile" type="url" required placeholder="https://scholar.google.com/..." />
       </div>
 
       <div class="row">
@@ -171,13 +167,13 @@
           <label for="affiliation">Affiliation
             <span class="hint">Institution or company.</span>
           </label>
-          <input id="affiliation" name="Affiliation" type="text" placeholder="MIT" />
+          <input id="affiliation" name="affiliation" type="text" placeholder="MIT" />
         </div>
         <div class="field">
           <label for="career_stage">Career stage
             <span class="hint">Optional.</span>
           </label>
-          <select id="career_stage" name="Career stage">
+          <select id="career_stage" name="career_stage">
             <option value="">—</option>
             <option>PhD student</option>
             <option>Postdoc</option>
@@ -192,14 +188,14 @@
         <label for="keywords">Research areas / keywords <span class="req">*</span>
           <span class="hint">Comma-separated — e.g. reinforcement learning, robotics, causal inference.</span>
         </label>
-        <input id="keywords" name="Research areas" type="text" required placeholder="vision, self-supervised learning, neuroscience" />
+        <input id="keywords" name="keywords" type="text" required placeholder="vision, self-supervised learning, neuroscience" />
       </div>
 
       <div class="field">
         <label for="fit">Why they'd be a great fit
           <span class="hint">A sentence or two on the work and why the lab would care.</span>
         </label>
-        <textarea id="fit" name="Why a good fit" placeholder="Their recent paper on ... is directly relevant to our project on ..."></textarea>
+        <textarea id="fit" name="fit" placeholder="Their recent paper on ... is directly relevant to our project on ..."></textarea>
       </div>
 
       <div class="row">
@@ -207,13 +203,13 @@
           <label for="contact">Best way to contact
             <span class="hint">Email, or "intro via me", etc.</span>
           </label>
-          <input id="contact" name="Best way to contact" type="text" placeholder="ada@mit.edu" />
+          <input id="contact" name="contact" type="text" placeholder="ada@mit.edu" />
         </div>
         <div class="field">
           <label for="relationship">How you know them
             <span class="hint">Optional.</span>
           </label>
-          <input id="relationship" name="How you know them" type="text" placeholder="Met at NeurIPS; former labmate" />
+          <input id="relationship" name="relationship" type="text" placeholder="Met at NeurIPS; former labmate" />
         </div>
       </div>
 
@@ -221,12 +217,12 @@
         <label for="availability">When they might be available
           <span class="hint">Optional — any timing notes, e.g. "free this fall", "on sabbatical until spring".</span>
         </label>
-        <input id="availability" name="Availability" type="text" placeholder="Flexible; prefers later in the semester" />
+        <input id="availability" name="availability" type="text" placeholder="Flexible; prefers later in the semester" />
       </div>
 
       <div class="field">
         <label for="recommender">Your name (recommender) <span class="req">*</span></label>
-        <input id="recommender" name="Recommended by" type="text" required placeholder="Your name" />
+        <input id="recommender" name="recommended_by" type="text" required placeholder="Your name" />
       </div>
 
       <button type="submit" id="submit-btn">Submit recommendation</button>
@@ -239,6 +235,8 @@
   </div>
 
   <script>
+    // Google Apps Script web-app endpoint (writes submissions into the Sheet)
+    const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzrortA47Ah2X_IqPKFe5_4W1mtn6tuvT4CGyYuH6huuZ8BqeBCai7lTpULdOWAlViqnQ/exec';
     const form = document.getElementById('speaker-form');
     const btn = document.getElementById('submit-btn');
     const result = document.getElementById('result');
@@ -248,19 +246,12 @@
       result.textContent = '';
       result.className = '';
 
-      const key = form.querySelector('[name="access_key"]').value;
-      if (key === 'YOUR_ACCESS_KEY_HERE') {
-        result.textContent = 'Set up needed: add your free Web3Forms access key in index.html.';
-        result.className = 'err';
-        return;
-      }
-
       btn.disabled = true;
       btn.textContent = 'Sending…';
 
       try {
         const data = new FormData(form);
-        const res = await fetch('https://api.web3forms.com/submit', {
+        const res = await fetch(ENDPOINT, {
           method: 'POST',
           body: data,
         });
