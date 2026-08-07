@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recommend a Speaker · Tom Lab</title>
   <meta name="description" content="Suggest a potential speaker for our lab meetings." />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <style>
     :root {
       --bg: #faf8f5;
@@ -259,8 +262,9 @@
         if (json.success) {
           form.outerHTML = `
             <div class="success-card">
-              <h2>Thank you!</h2>
-              <p>Your recommendation was sent to the organizers. We'll take a look soon.</p>
+              <h2>Submitted — thank you!</h2>
+              <p>Your recommendation was added to our list. An organizer reviews each
+              entry, so it'll appear on the dashboard once it's approved.</p>
               <a href="index.html">Recommend another →</a>
             </div>`;
         } else {
