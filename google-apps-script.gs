@@ -80,8 +80,7 @@ function doGet() {
   const out = [];
   for (let i = 1; i < values.length; i++) {
     const r = values[i];
-    const approved = r[1] === true || String(r[1]).toUpperCase() === 'TRUE';
-    if (!approved) continue;
+    if (!r[2]) continue; // skip blank rows (no speaker name)
     const keywords = String(r[6] || '')
       .split(',').map(function (k) { return k.trim(); }).filter(Boolean);
     out.push({
